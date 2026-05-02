@@ -8,13 +8,20 @@ DATA_FILE = Path("tasks.json")
 def load_tasks() -> list[dict]:
     if not DATA_FILE.exists():
         return []
-    return json.loads(DATA_FILE.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return []
+    if not isinstance(data, list):
+        return []
+    return data
 
 
 def save_tasks(tasks: list[dict]) -> None:
-    DATA_FILE.write_text(
-        json.dumps(tasks, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    payload = json.dumps(tasks, ensure_ascii=False, indent=2)
+    tmp_file = DATA_FILE.with_name(f"{DATA_FILE.name}.tmp")
+    tmp_file.write_text(payload, encoding="utf-8")
+    tmp_file.replace(DATA_FILE)
 
 
 def add_task(title: str) -> None:
