@@ -1,5 +1,6 @@
 import argparse
 import json
+import tempfile
 from pathlib import Path
 
 DATA_FILE = Path("tasks.json")
@@ -19,9 +20,22 @@ def load_tasks() -> list[dict]:
 
 def save_tasks(tasks: list[dict]) -> None:
     payload = json.dumps(tasks, ensure_ascii=False, indent=2)
-    tmp_file = DATA_FILE.with_name(f"{DATA_FILE.name}.tmp")
-    tmp_file.write_text(payload, encoding="utf-8")
-    tmp_file.replace(DATA_FILE)
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            delete=False,
+            dir=DATA_FILE.parent,
+            prefix=f"{DATA_FILE.stem}-",
+            suffix=".tmp",
+        ) as handle:
+            handle.write(payload)
+            tmp_path = Path(handle.name)
+        tmp_path.replace(DATA_FILE)
+    finally:
+        if tmp_path and tmp_path.exists():
+            tmp_path.unlink()
 
 
 def add_task(title: str) -> None:
