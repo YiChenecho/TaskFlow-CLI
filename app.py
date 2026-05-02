@@ -57,7 +57,7 @@ def delete_task(task_id: int) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="TaskFlow CLI")
+    parser = argparse.ArgumentParser(description="Mini Todo CLI")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_add = sub.add_parser("add", help="添加任务")
